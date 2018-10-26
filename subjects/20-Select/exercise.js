@@ -16,21 +16,86 @@ class Select extends React.Component {
     defaultValue: PropTypes.any
   };
 
+  state = { showOptions: false, value:this.props.defaultValue }
+
+  toggleOptions = () => {
+    this.setState({ showOptions: !this.state.showOptions })
+  }
+
+  handleOnClick = (value) => {
+    this.setState({
+      value,
+    })
+  }
+
+  handleMatchValue = () => {
+    let value = '';
+    React.Children.forEach(this.props.children, (child)=>{
+      if(child.props.value === this.state.value
+      || child.props.value === this.props.defaultValue)
+        value = child.props.children;
+    })
+    return value;
+  }
+
+  componentDidUpdate(prevProps,prevState){
+    if(prevProps.value !== this.props.value){
+      // console.log('changed prop',prevProps.value,this.props.value)
+      if(this.props.onChange){
+        this.props.onChange(this.props.value);
+      }
+      this.setState({
+        value: this.props.value,
+      })
+    }
+    if(prevState.value !== this.state.value){
+      // console.log('changed state')
+      if(this.props.onChange){
+        this.props.onChange(this.state.value);
+      }
+    }
+  }
+
+  componentDidMount(){
+    if(this.props.value){
+      this.setState({
+        value: this.props.value,
+      });
+    }
+    else {
+      this.setState({
+        value: this.props.defaultValue,
+      })
+    }
+  }
+
   render() {
+    const label = this.handleMatchValue();
+    const children = React.Children.map(this.props.children,(child)=>{
+      return React.cloneElement(child,{
+        _onClick: () => this.handleOnClick(child.props.value),
+      })
+    })
+
     return (
-      <div className="select">
+      <div className="select" onClick={this.toggleOptions}>
         <div className="label">
-          label <span className="arrow">▾</span>
+          {label} <span className="arrow">▾</span>
         </div>
-        <div className="options">{this.props.children}</div>
+        {this.state.showOptions &&
+        <div className="options">{children}</div>}
       </div>
     );
   }
 }
 
 class Option extends React.Component {
+  static propTypes = {
+    _onClick: PropTypes.func,
+  };
+
   render() {
-    return <div className="option">{this.props.children}</div>;
+    return <div className="option" onClick={this.props._onClick}>{this.props.children}</div>;
   }
 }
 

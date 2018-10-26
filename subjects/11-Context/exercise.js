@@ -19,32 +19,66 @@ import React from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 
+const FormContext = React.createContext()
 class Form extends React.Component {
+  state = {
+    values: {},
+  }
   render() {
-    return <div>{this.props.children}</div>;
+    return (
+      <FormContext.Provider
+        value={{
+          onSubmit: ()=>{this.props.onSubmit(this.state.values)},
+          onChange: (e)=>{this.setState({values:{...this.state.values,[e.name]:e.value}})}
+        }}
+        >
+        <div>{this.props.children}</div>
+      </FormContext.Provider>
+
+    );
   }
 }
 
 class SubmitButton extends React.Component {
   render() {
-    return <button>{this.props.children}</button>;
+    return (
+      <FormContext.Consumer>
+        {
+          (value) => {
+            return <button onClick={value.onSubmit}>{this.props.children}</button>
+          }
+        }
+      </FormContext.Consumer>
+    );
   }
 }
 
 class TextInput extends React.Component {
   render() {
     return (
-      <input
-        type="text"
-        name={this.props.name}
-        placeholder={this.props.placeholder}
-      />
+      <FormContext.Consumer>
+        {
+          (value) => {
+            return   <input
+                type="text"
+                name={this.props.name}
+                placeholder={this.props.placeholder}
+                onKeyPress={(e)=>{
+                  if(e.key === 'Enter')
+                    value.onSubmit();
+                }}
+                onChange={(e)=>{value.onChange({name:this.props.name,value:e.target.value})}}
+              />
+          }
+        }
+      </FormContext.Consumer>
     );
   }
 }
 
 class App extends React.Component {
-  handleSubmit = () => {
+  handleSubmit = (e) => {
+    console.log(e);
     alert("YOU WIN!");
   };
 

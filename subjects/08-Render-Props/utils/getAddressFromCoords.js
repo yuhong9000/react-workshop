@@ -15,7 +15,7 @@ function wait(timeout, work) {
 const retryTimeout = 5000;
 
 function getAddressFromCoords(latitude, longitude) {
-  const url = `${GoogleMapsAPI}/geocode/json?latlng=${latitude},${longitude}`;
+  const url = `${GoogleMapsAPI}/geocode/json?key=AIzaSyAy9BcNDI_Z4KQg-WKLLrWPIrkdAGJjIok&latlng=${latitude},${longitude}`;
 
   return fetch(url)
     .then(res => res.json())
